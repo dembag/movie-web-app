@@ -1,3 +1,4 @@
+from flask import jsonify
 from sqlalchemy import select, delete
 from models import Session, Movie, User
 
@@ -20,6 +21,13 @@ class DataManager:
         query = select(User).order_by(User.name.asc())
         all_users = self.session.execute(query).scalars().all()
         return all_users
+
+
+    def get_user_by_id(self, user_id):
+        """ Returns a single user by id."""
+        query = select(User).where(User.id == user_id)
+        user = self.session.execute(query).scalar_one_or_none()
+        return user
 
 
     def get_movies(self, user_id):

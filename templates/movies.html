@@ -1,0 +1,17 @@
+{% extends "base.html" %}
+{% block content %}
+
+<h1>{{ user }}</h1>
+<ul class="user-list">
+    {% for movie in movies %}
+    <p>{{ movie.name }}</p>
+    {% endfor %}
+</ul>
+
+<form action="{{ url_for('index') }}" method="get">
+    <input type="submit" value="Home"/>
+</form>
+
+
+
+{% endblock %}
