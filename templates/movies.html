@@ -1,15 +1,33 @@
 {% extends "base.html" %}
 {% block content %}
 
-<h1>{{ user }}</h1>
+<h1>{{ user.name }}</h1>
 <ul class="user-list">
     {% for movie in movies %}
-    <p>{{ movie.name }}</p>
+    <li>{{ movie.title }}</li>
     {% endfor %}
 </ul>
 
-<form action="{{ url_for('index') }}" method="get">
-    <input type="submit" value="Home"/>
+<form action="{{ url_for('add_to_favourites', user_id=user.id) }}" method="post">
+<h2>Add Movie</h2>
+    <input
+        type="text"
+        name="title"
+        id="title"
+        minlength="1"
+        maxlength="200"
+        placeholder="Title"
+        required/>
+    <input
+        type="number"
+        name="year"
+        id="year"
+        min="1800"
+        max="3000"
+        step="1"
+        placeholder="Year (optional, YYYY)"/>
+
+    <input class="btn" type="submit" value="Add Movie"/>
 </form>
 
 
