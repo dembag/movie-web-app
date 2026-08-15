@@ -1,8 +1,7 @@
 import os
 from dotenv import load_dotenv
 import requests
-from flask import Flask, jsonify, render_template, redirect, request
-
+from flask import Flask, jsonify, render_template, redirect, request, url_for
 
 from data_manager import DataManager
 import data_manager
@@ -62,7 +61,7 @@ def add_to_favourites(user_id):
 
     # Get movie data from API
     new_movie_data = data_manager.fetch_movie_from_omdb(new_movie_title, new_movie_year)
-
+    movies = dm.get_movies(user_id)
     if not new_movie_data:
         # OMDB found nothing --------------------rerender with error handling
         return render_template("movies.html", user_id=user_id, user=user, movies=movies,
@@ -79,11 +78,21 @@ def add_to_favourites(user_id):
 
     added_movie = dm.add_movie(new_movie)
 
-    movies = dm.get_movies(user_id)
     print(new_movie_data)
 
-    return render_template("movies.html", user_id=user_id, user=user, movies=movies)
+    return redirect(url_for("get_movies", user_id=user_id))
 
+
+@app.route("/users/<int:user_id>/movies/<int:movie_id>/update", methods=["POST"])
+def update_title(user_id, movie_id):
+    """ Allows the user to update the title of a movie."""
+    new_title = request.form.get("title")
+
+    # Add data validation
+
+    updated_title = dm.update_movie(user_id, movie_id, new_title)
+
+    return redirect(url_for("get_movies", user_id=user_id))
 
 
 

@@ -55,10 +55,13 @@ class DataManager:
                 raise
 
 
-    def update_movie(self, movie_id, new_title):
-        """ Updates the details of a specific movie in the database."""
+    def update_movie(self, user_id, movie_id, new_title):
+        """ Updates the title of a specific movie for a specific user in the database."""
         with Session() as session:
-            query = select(Movie).where(Movie.id == movie_id)
+            query = select(Movie).where(
+                Movie.id == movie_id,
+                Movie.user_id == user_id
+            )
             movie_to_update = session.execute(query).scalar_one()
             movie_to_update.title = new_title
             session.commit()

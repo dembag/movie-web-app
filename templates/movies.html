@@ -1,12 +1,21 @@
 {% extends "base.html" %}
 {% block content %}
 
-<h1>{{ user.name }}</h1>
-<ul class="user-list">
+<h1>{{ user.name }}'s Favourites</h1>
+<div class="display-cards">
     {% for movie in movies %}
-    <li>{{ movie.title }}</li>
+    <div class="card">
+        <img src="{{ movie.poster_url }}" alt="Poster for {{ movie.title }}" class="movie-poster">
+        <form action="{{ url_for('update_title', user_id=user.id, movie_id=movie.id) }}" method="post">
+            <input name="title" required type="text" value="{{ movie.title }}">
+            <button type="submit" class="btn-small">Update Title</button>
+        </form>
+            <div><strong>Year: </strong> {{movie.year }}</div>
+            <div><strong>Director: </strong> {{ movie.director }}</div>
+        <form action="{{ url_for("
+    </div>
     {% endfor %}
-</ul>
+</div>
 
 <form action="{{ url_for('add_to_favourites', user_id=user.id) }}" method="post">
 <h2>Add Movie</h2>
