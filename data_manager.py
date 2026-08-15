@@ -68,10 +68,13 @@ class DataManager:
             return movie_to_update
 
 
-    def delete_movie(self, movie_id):
+    def delete_movie(self, user_id, movie_id):
         """ Deletes the movie from the users list of favourites."""
         with Session() as session:
-            query = delete(Movie).where(Movie.id == movie_id)
+            query = delete(Movie).where(
+                Movie.id == movie_id,
+                Movie.user_id == user_id
+            )
             session.execute(query)
             session.commit()
             return "Movie successfully deleted."

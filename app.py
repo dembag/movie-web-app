@@ -95,6 +95,16 @@ def update_title(user_id, movie_id):
     return redirect(url_for("get_movies", user_id=user_id))
 
 
+@app.route("/users/<int:user_id>/movies/<int:movie_id>/delete", methods=["POST"])
+def delete_movie(user_id, movie_id):
+    """ Allows the user to delete a movie from their favourites."""
+    deleted_movie = dm.delete_movie(user_id, movie_id)
+
+    print(deleted_movie)
+
+    return redirect(url_for("get_movies", user_id=user_id))
+
+
 
 if __name__ == "__main__":
     Base.metadata.create_all(engine)
