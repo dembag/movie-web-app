@@ -60,16 +60,27 @@ def add_to_favourites(user_id):
 
     new_movie_year = int(new_movie_year) if new_movie_year else None
 
+    # Get movie data from API
     new_movie_data = data_manager.fetch_movie_from_omdb(new_movie_title, new_movie_year)
-    movies = dm.get_movies(user_id)
 
     if not new_movie_data:
         # OMDB found nothing --------------------rerender with error handling
         return render_template("movies.html", user_id=user_id, user=user, movies=movies,
                                error="Movie not found")
 
+    # Format data for movies table
+    new_movie = Movie(
+        title=new_movie_data.get("Title"),
+        director=new_movie_data.get("Director"),
+        year=new_movie_data.get("Year"),
+        poster_url=new_movie_data.get("Poster"),
+        user_id=user_id
+    )
 
-    print(new_movie_data["Director"])
+    added_movie = dm.add_movie(new_movie)
+
+    movies = dm.get_movies(user_id)
+    print(new_movie_data)
 
     return render_template("movies.html", user_id=user_id, user=user, movies=movies)
 

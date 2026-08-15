@@ -48,7 +48,8 @@ class DataManager:
             try:
                 session.add(new_movie)
                 session.commit()
-                return new_movie
+                new_movie_title = new_movie.title
+                return new_movie_title
             except Exception:
                 session.rollback()
                 raise
