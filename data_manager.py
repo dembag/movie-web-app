@@ -1,7 +1,11 @@
 import os
+from typing import Any
+
 from dotenv import load_dotenv
 import requests
 from sqlalchemy import select, delete
+from sqlalchemy.exc import NoResultFound
+
 from models import Session, Movie, User
 
 load_dotenv()
@@ -48,8 +52,8 @@ class DataManager:
             try:
                 session.add(new_movie)
                 session.commit()
-                new_movie_title = new_movie.title
-                return new_movie_title
+                return {"id": new_movie.id, "title": new_movie.title}
+
             except Exception:
                 session.rollback()
                 raise
@@ -62,10 +66,14 @@ class DataManager:
                 Movie.id == movie_id,
                 Movie.user_id == user_id
             )
-            movie_to_update = session.execute(query).scalar_one()
+            try:
+                movie_to_update = session.execute(query).scalar_one()
+            except NoResultFound:
+                return None
+
             movie_to_update.title = new_title
             session.commit()
-            return movie_to_update
+            return {"id": movie_to_update.id, "title": movie_to_update.title}
 
 
     def delete_movie(self, user_id, movie_id):
@@ -75,9 +83,14 @@ class DataManager:
                 Movie.id == movie_id,
                 Movie.user_id == user_id
             )
-            session.execute(query)
+            result = session.execute(query)
             session.commit()
-            return "Movie successfully deleted."
+
+            if result.rowcount == 0:
+                # Movie wasnt in database.
+                return None
+
+            return {"message": "Movie successfully deleted."}
 
 
 
@@ -96,7 +109,7 @@ def fetch_movie_from_omdb(title, year=None):
     movie_data = response.json()
 
     if movie_data.get("Response") == "False":
-        return movie_data.get("Error")
+        return None
 
     return movie_data
 

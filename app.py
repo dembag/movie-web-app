@@ -1,6 +1,3 @@
-import os
-from dotenv import load_dotenv
-import requests
 from flask import Flask, jsonify, render_template, redirect, request, url_for
 
 from data_manager import DataManager
@@ -22,12 +19,12 @@ def create_users():
     """ Gets new_user_name from the form and adds the new user to users table."""
     users = dm.get_users()
 
-    new_user_name = request.form["new_user_name"].strip()
+    new_user_name = request.form.get("new_user_name", "").strip()
 
     # Validate data
-    if not new_user_name:
+    if not new_user_name or len(new_user_name) > 15:
         return jsonify({
-            "error": "Name is required."
+            "error": "Name is required and must be less than 15 characters."
         }), 400
 
     # Add to database
@@ -54,31 +51,53 @@ def get_movies(user_id):
 def add_to_favourites(user_id):
     """ Adds a movie to the users favourites list."""
     user = dm.get_user_by_id(user_id)
-    new_movie_title = request.form.get("title")
-    new_movie_year = request.form.get("year")
+    if user is None:
+        return jsonify({"error": "User not found!"}), 404
 
-    new_movie_year = int(new_movie_year) if new_movie_year else None
+    new_movie_title = request.form.get("title", "").strip()
+    new_movie_year_raw = request.form.get("year", "").strip()
+
+    if not new_movie_title:
+        movies = dm.get_movies(user_id)
+        return render_template("movies.html", user_id=user_id, user=user,
+                               movies=movies, error="Title is required.")
+
+    new_movie_year = None
+    if new_movie_year_raw:
+        if not new_movie_year_raw.isdigit():
+            movies = dm.get_movies(user_id)
+            return render_template("movies.html", user_id=user_id, user=user,
+                               movies=movies, error="Year must be a number.")
+        new_movie_year = int(new_movie_year_raw)
 
     # Get movie data from API
     new_movie_data = data_manager.fetch_movie_from_omdb(new_movie_title, new_movie_year)
-    movies = dm.get_movies(user_id)
+
     if not new_movie_data:
-        # OMDB found nothing --------------------rerender with error handling
+        # OMDB found nothing
+        movies = dm.get_movies(user_id)
         return render_template("movies.html", user_id=user_id, user=user, movies=movies,
                                error="Movie not found")
 
     # Format data for movies table
+    omdb_year = new_movie_data.get("Year", "")
+    safe_year = int(omdb_year[:4]) if omdb_year[:4].isdigit() else None
+
+    director = new_movie_data.get("Director")
+    director = director if director and director != "N/A" else "Unknown"
+
+    poster_url = new_movie_data.get("Poster")
+    poster_url = poster_url if poster_url and poster_url != "N/A" else None
+
     new_movie = Movie(
         title=new_movie_data.get("Title"),
-        director=new_movie_data.get("Director"),
-        year=new_movie_data.get("Year"),
-        poster_url=new_movie_data.get("Poster"),
+        director=director,
+        year=safe_year,
+        poster_url=poster_url,
         user_id=user_id
     )
 
-    added_movie = dm.add_movie(new_movie)
-
-    print(new_movie_data)
+    dm.add_movie(new_movie)
 
     return redirect(url_for("get_movies", user_id=user_id))
 
@@ -88,9 +107,15 @@ def update_title(user_id, movie_id):
     """ Allows the user to update the title of a movie."""
     new_title = request.form.get("title")
 
-    # Add data validation
+    if not new_title:
+        return jsonify({"error": "Title is required."}), 400
+    if len(new_title) > 200:
+        return jsonify({"error": "Title is too long."}), 400
+
 
     updated_title = dm.update_movie(user_id, movie_id, new_title)
+    if updated_title is None:
+        return jsonify({"error": "Movie not found."}), 404
 
     return redirect(url_for("get_movies", user_id=user_id))
 
@@ -99,10 +124,14 @@ def update_title(user_id, movie_id):
 def delete_movie(user_id, movie_id):
     """ Allows the user to delete a movie from their favourites."""
     deleted_movie = dm.delete_movie(user_id, movie_id)
+    if deleted_movie is None:
+        return jsonify({"error": "Movie not found."}), 404
 
     print(deleted_movie)
 
     return redirect(url_for("get_movies", user_id=user_id))
+
+
 
 
 
