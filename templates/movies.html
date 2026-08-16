@@ -2,6 +2,11 @@
 {% block content %}
 
 <h1>{{ user.name }}'s Favourites</h1>
+
+{% if error %}
+    <p class="error">{{ error }}</p>
+{% endif %}
+
 <div class="display-cards">
     {% for movie in movies %}
     <div class="card">

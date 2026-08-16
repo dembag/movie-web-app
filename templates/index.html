@@ -11,6 +11,9 @@
 </ul>
 
 <form action="{{ url_for('create_users') }}" method="post">
+    {% if error %}
+        <p class="error">{{ error }}</p>
+    {% endif %}
     <label for="new_user_name">Name (3 to 15 characters):</label>
     <input
             type="text"

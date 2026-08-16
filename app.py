@@ -23,9 +23,8 @@ def create_users():
 
     # Validate data
     if not new_user_name or len(new_user_name) > 15:
-        return jsonify({
-            "error": "Name is required and must be less than 15 characters."
-        }), 400
+        return render_template("index.html", users=users,
+                               error="Name is required and must be 3 to 15 characters."), 400
 
     # Add to database
     dm.create_user(new_user_name)
@@ -107,10 +106,11 @@ def update_title(user_id, movie_id):
     """ Allows the user to update the title of a movie."""
     new_title = request.form.get("title")
 
-    if not new_title:
-        return jsonify({"error": "Title is required."}), 400
-    if len(new_title) > 200:
-        return jsonify({"error": "Title is too long."}), 400
+    if not new_title or len(new_title) > 200:
+        user = dm.get_user_by_id(user_id)
+        movies = dm.get_movies(user_id)
+        return render_template("movies.html", user_id=user_id, user=user, movies=movies,
+                               error="Title is required and must be less than 200 characters."), 400
 
 
     updated_title = dm.update_movie(user_id, movie_id, new_title)
@@ -127,12 +127,14 @@ def delete_movie(user_id, movie_id):
     if deleted_movie is None:
         return jsonify({"error": "Movie not found."}), 404
 
-    print(deleted_movie)
-
     return redirect(url_for("get_movies", user_id=user_id))
 
 
-
+@app.errorhandler(404)
+def page_not_found(error):
+    return render_template("404.html",
+                           error=error,
+                           back_url=request.referrer or url_for("index")), 404
 
 
 if __name__ == "__main__":
