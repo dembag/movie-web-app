@@ -7,6 +7,7 @@ from models import Base, engine, Movie
 app = Flask(__name__)
 dm = DataManager()
 
+Base.metadata.create_all(engine)
 
 @app.route("/")
 def index():
@@ -138,5 +139,5 @@ def page_not_found(error):
 
 
 if __name__ == "__main__":
-    Base.metadata.create_all(engine)
+
     app.run(debug=True)
