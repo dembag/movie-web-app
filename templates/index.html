@@ -2,14 +2,16 @@
 {% block content %}
 
 <h1>Users</h1>
-<ul class="user-list">
+
+<div class="display-cards">
     {% for user in users %}
-    <li class="user-entry">
-        <a href="{{ url_for('get_movies', user_id=user.id) }}" class="btn">{{ user.name }}</a>
-    </li>
+    <div class="card">
+        <label for="username"><h2>{{ user.name }}</h2></label>
+        <a id="username" href="{{ url_for('get_movies', user_id=user.id) }}" class="btn-small">View Movies</a>
+    </div>
     {% endfor %}
 </ul>
-
+</div>
 <form action="{{ url_for('create_users') }}" method="post">
     {% if error %}
         <p class="error">{{ error }}</p>
@@ -22,6 +24,7 @@
             minlength="3"
             maxlength="15"
             size="15"
+            placeholder="Enter username"
             required/>
     <input class="btn" type="submit" value="Add user"/>
 </form>

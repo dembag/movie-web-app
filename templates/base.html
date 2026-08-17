@@ -8,10 +8,13 @@
 <body>
     <nav>
         <div class="container">
+            <img class="movies-logo" src="{{ url_for('static', filename='goouttothemovies.svg') }}" alt="Movies Logo.">
             <a href="{{ url_for('index') }}" class="logo"><h1>Web Movie App</h1></a>
+
         </div>
     </nav>
     <main class="container">
+        <a href="{{ url_for('index') }}" class="home">Home</a>
         {% block content %}{% endblock %}
     </main>
 </body>
