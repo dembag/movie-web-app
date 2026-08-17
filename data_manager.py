@@ -8,7 +8,8 @@ from sqlalchemy.exc import NoResultFound
 
 from models import Session, Movie, User
 
-load_dotenv()
+basedir = os.path.abspath(os.path.dirname(__file__))
+load_dotenv(os.path.join(basedir, ".env"))
 OMDB_API_KEY = os.getenv("OMDB_API_KEY")
 
 class DataManager:
